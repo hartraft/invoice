@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/signintech/gopdf"
+	"golang.org/x/text/message"
 )
 
 const (
@@ -150,20 +151,33 @@ func writeFooter(pdf *gopdf.GoPdf, id string) {
 }
 
 func writeRow(pdf *gopdf.GoPdf, item string, quantity int, rate float64) {
+	p := message.NewPrinter(message.MatchLanguage("en"))
 	_ = pdf.SetFont("Inter", "", 11)
 	pdf.SetTextColor(0, 0, 0)
 
 	total := float64(quantity) * rate
-	amount := strconv.FormatFloat(total, 'f', 2, 64)
+	amount := p.Sprint(total)
 
-	_ = pdf.Cell(nil, item)
-	pdf.SetX(quantityColumnOffset)
-	_ = pdf.Cell(nil, strconv.Itoa(quantity))
-	pdf.SetX(rateColumnOffset)
-	_ = pdf.Cell(nil, currencySymbols[file.Currency]+strconv.FormatFloat(rate, 'f', 2, 64))
-	pdf.SetX(amountColumnOffset)
-	_ = pdf.Cell(nil, currencySymbols[file.Currency]+amount)
-	pdf.Br(24)
+	formattedItem := strings.ReplaceAll(item, `\n`, "\n")
+
+	itemLines := strings.Split(formattedItem, "\n")
+
+	for i := 0; i < len(itemLines); i++ {
+		if i == 0 {
+			_ = pdf.Cell(nil, itemLines[i])
+			pdf.Br(18)
+			pdf.SetX(quantityColumnOffset)
+			_ = pdf.Cell(nil, strconv.Itoa(quantity))
+			pdf.SetX(rateColumnOffset)
+			_ = pdf.Cell(nil, currencySymbols[file.Currency]+p.Sprint(rate))
+			pdf.SetX(amountColumnOffset)
+			_ = pdf.Cell(nil, currencySymbols[file.Currency]+amount)
+			pdf.Br(24)
+		} else {
+			_ = pdf.Cell(nil, itemLines[i])
+			pdf.SetX(quantityColumnOffset)
+		}
+	}
 }
 
 func writeTotals(pdf *gopdf.GoPdf, subtotal float64, tax float64, discount float64) {
@@ -180,6 +194,8 @@ func writeTotals(pdf *gopdf.GoPdf, subtotal float64, tax float64, discount float
 }
 
 func writeTotal(pdf *gopdf.GoPdf, label string, total float64) {
+	p := message.NewPrinter(message.MatchLanguage("en"))
+	formattedTotal := p.Sprint(total)
 	_ = pdf.SetFont("Inter", "", 9)
 	pdf.SetTextColor(75, 75, 75)
 	pdf.SetX(rateColumnOffset)
@@ -190,7 +206,7 @@ func writeTotal(pdf *gopdf.GoPdf, label string, total float64) {
 	if label == totalLabel {
 		_ = pdf.SetFont("Inter-Bold", "", 11.5)
 	}
-	_ = pdf.Cell(nil, currencySymbols[file.Currency]+strconv.FormatFloat(total, 'f', 2, 64))
+	_ = pdf.Cell(nil, currencySymbols[file.Currency]+formattedTotal)
 	pdf.Br(24)
 }
 

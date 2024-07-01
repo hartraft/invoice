@@ -184,18 +184,18 @@ func writeTotals(pdf *gopdf.GoPdf, subtotal float64, tax float64, discount float
 	pdf.SetY(600)
 
 	writeTotal(pdf, subtotalLabel, subtotal)
-	if tax > 0 {
-		writeTotal(pdf, taxLabel, tax)
-	}
 	if discount > 0 {
 		writeTotal(pdf, discountLabel, discount)
+	}
+	if tax > 0 {
+		writeTotal(pdf, taxLabel, tax)
 	}
 	writeTotal(pdf, totalLabel, subtotal+tax-discount)
 }
 
 func writeTotal(pdf *gopdf.GoPdf, label string, total float64) {
 	p := message.NewPrinter(message.MatchLanguage("en"))
-	formattedTotal := p.Sprint(total)
+	formattedTotal := p.Sprintf("%.2f", total)
 	_ = pdf.SetFont("Inter", "", 9)
 	pdf.SetTextColor(75, 75, 75)
 	pdf.SetX(rateColumnOffset)

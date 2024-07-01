@@ -63,7 +63,6 @@ var (
 	file           = Invoice{}
 	defaultInvoice = DefaultInvoice()
 )
-
 func init() {
 	viper.AutomaticEnv()
 
@@ -148,7 +147,7 @@ var generateCmd = &cobra.Command{
 		if file.Note != "" {
 			writeNotes(&pdf, file.Note)
 		}
-		writeTotals(&pdf, subtotal, subtotal*file.Tax, subtotal*file.Discount)
+		writeTotals(&pdf, subtotal, (subtotal-(subtotal*file.Discount))*file.Tax, subtotal*file.Discount)
 		if file.Due != "" {
 			writeDueDate(&pdf, file.Due)
 		}
@@ -158,7 +157,6 @@ var generateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-
 		fmt.Printf("Generated %s\n", output)
 
 		return nil

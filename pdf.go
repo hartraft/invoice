@@ -150,12 +150,12 @@ func writeFooter(pdf *gopdf.GoPdf, id string) {
 	pdf.Br(48)
 }
 
-func writeRow(pdf *gopdf.GoPdf, item string, quantity int, rate float64) {
+func writeRow(pdf *gopdf.GoPdf, item string, quantity float64, rate float64) {
 	p := message.NewPrinter(message.MatchLanguage("en"))
 	_ = pdf.SetFont("Inter", "", 11)
 	pdf.SetTextColor(0, 0, 0)
 
-	total := float64(quantity) * rate
+	total := quantity * rate
 	amount := p.Sprint(total)
 
 	formattedItem := strings.ReplaceAll(item, `\n`, "\n")
@@ -167,7 +167,7 @@ func writeRow(pdf *gopdf.GoPdf, item string, quantity int, rate float64) {
 			_ = pdf.Cell(nil, itemLines[i])
 			pdf.Br(18)
 			pdf.SetX(quantityColumnOffset)
-			_ = pdf.Cell(nil, strconv.Itoa(quantity))
+			_ = pdf.Cell(nil, p.Sprint(quantity))
 			pdf.SetX(rateColumnOffset)
 			_ = pdf.Cell(nil, currencySymbols[file.Currency]+p.Sprint(rate))
 			pdf.SetX(amountColumnOffset)
